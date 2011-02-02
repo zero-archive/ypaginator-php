@@ -12,12 +12,12 @@
  *
  * @package YPaginator
  * @author  dZ <mail@dotzero.ru>
- * @version 0.5 (2-feb-2011)
+ * @version 0.2 (2-feb-2011)
  * @link    http://dotzero.ru
  * @link    https://github.com/dotzero/YPaginator/
  *
  * @example
- * $paginator = new YPaginator(9);
+ * $paginator = new YPaginator(100);
  * $paginatorArray = $paginator->setRecordsPerPage(2)
  *                             ->setCurrentPage(3)
  *                             ->setPadding(2)
