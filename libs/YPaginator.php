@@ -2,27 +2,28 @@
 /**
  * YPaginator
  *
- * 'Yandex like' пагинатор с начальными и конечными ссылками,
- * ссылками на предыдущую и последующие страницы, а также
- * оптимизированный для сокрытия части ссылок на промежуточные значения
- * при большом количестве страниц
+ * Виджет для создания 'Yandex-like' пагинатора
+ * - отображение ссылок на первую и последнюю страницы
+ * - замена премежуточных значений на `...`
+ * - отображение дополнительных ссылок слева и справа от текущей
  *
- * Пример:
- * |1|...|5||6||7|...|100|
+ * Пример пагинатора:
+ * << предыдущая | следующая >>
+ * |1| ... |5||6||7| ... |100|
  *
  * @package YPaginator
  * @author  dZ <mail@dotzero.ru>
- * @version 0.2 (2-feb-2011)
+ * @version 0.3 (4-feb-2011)
  * @link    http://dotzero.ru
  * @link    https://github.com/dotzero/YPaginator/
  *
  * @example
- * $paginator = new YPaginator(100);
+ * $paginator = new YPaginator(9);
  * $paginatorArray = $paginator->setRecordsPerPage(2)
  *                             ->setCurrentPage(3)
  *                             ->setPadding(2)
  *                             ->setPrevNext(TRUE)
- *                             ->makeLink('/news/{page}/')
+ *                             ->linkTemplate('{page}', '/news/page/{page}/')
  *                             ->getPaginator();
  */
 class YPaginator
@@ -48,19 +49,24 @@ class YPaginator
     private $currentPage = 1;
 
     /**
-     * Количество отображаемый страниц слева и справа от текущей
+     * Количество отображаемых ссылок слева и справа от текущей
      */
     private $paddingCount = 2;
 
     /**
-     * Использование ссылок следующая / предыдущая
+     * Добавление в массив ссылок на следующую и предыдущие страницы
      */
     private $usePrevNextLinks = TRUE;
 
     /**
-     * Дополнительные параметры для ссылки
+     * Шаблон для замены в ссылках
      */
-    private $linkMask = '{page}';
+    private $maskPattern = '{page}';
+
+    /**
+     * Шаблон ссылок
+     */
+    private $linkTemplate = '?page={page}';
 
     /**
      * В конструктор необходимо передать общее количество записей
@@ -125,15 +131,16 @@ class YPaginator
     }
 
     /**
-     * Генерация ссылки по шаблону
-     * {page} - номер страницы
+     * Установка шаблона и маски для замены в ссылках
      *
-     * @param string $string
+     * @param string $mask
+     * @param string $template
      * @return $this
      */
-    public function makeLink($string = '')
+    public function linkTemplate($mask, $template)
     {
-        $this->linkMask = $string;
+        $this->maskPattern = $mask;
+        $this->linkTemplate = $template;
 
         return $this;
     }
@@ -149,36 +156,28 @@ class YPaginator
 
         $this->recalculatePages();
 
-        if($this->totalRecords == 0)
-        {
-            return FALSE;
-        }
-
-        if($this->usePrevNextLinks === TRUE)
-        {
-            if(($this->currentPage - 1) > 1)
-            {
-                $result['prev'] = str_replace('{page}', ($this->currentPage - 1), $this->linkMask);
-            }
-
-            if($this->currentPage < $this->totalPages)
-            {
-                $result['next'] = str_replace('{page}', ($this->currentPage + 1), $this->linkMask);
-            }
-        }
-
-        if($pages = $this->calcPages())
+        if($this->totalRecords > 0 AND $pages = $this->calcPages())
         {
             foreach ($pages AS $key => $val)
             {
-                $val['link'] = str_replace('{page}', $val['link'], $this->linkMask);
+                $val['link'] = str_replace($this->maskPattern, $val['link'], $this->linkTemplate);
                 $pages[$key] = $val;
             }
 
             $result['pages'] = $pages;
+
+            if($this->usePrevNextLinks)
+            {
+                $result[''] = array();
+
+                $result['prev'] = (($this->currentPage - 1) > 1) ? str_replace($this->maskPattern, ($this->currentPage - 1), $this->linkTemplate) : NULL;
+                $result['next'] = ($this->currentPage < $this->totalPages) ? str_replace($this->maskPattern, ($this->currentPage + 1), $this->linkTemplate) : NULL;
+            }
+
+            return $result;
         }
 
-        return $result;
+        return FALSE;
     }
 
     /**
@@ -193,30 +192,27 @@ class YPaginator
         $start = $this->currentPage - $this->paddingCount;
         $start = (intval($start) < 1) ? 1 : intval($start);
 
-        $end = $start + $this->paddingCount * 2;
+        $end = $this->currentPage + $this->paddingCount;
         $end = (intval($end) > $this->totalPages) ? $this->totalPages : intval($end);
 
-        if($this->paddingCount > 0 AND $start > 1)
+        if($start > ($this->paddingCount + 1))
         {
             $paginator[] = array('name' => '1', 'link' => 1);
         }
 
-        if($this->paddingCount > 0 AND $start > 2)
+        if($start > 2)
         {
-            $paginator[] = array('name' => '...',
-                                 'link' => $start - 1);
+            $paginator[] = array('name' => '...', 'link' => $start - 1);
         }
 
         for($i = $start; $i <= $end; $i++)
         {
-            $paginator[] = array('name' => $i,
-                                 'link' => $i);
+            $paginator[] = ($this->currentPage == $i) ? array('name' => $i, 'link' => $i, 'current' => '1') : array('name' => $i, 'link' => $i);
         }
 
         if($end + 1 < $this->totalPages)
         {
-            $paginator[] = array('name' => '...',
-                                 'link' => $end + 1);
+            $paginator[] = array('name' => '...', 'link' => $end + 1);
         }
 
         if($end < $this->totalPages)

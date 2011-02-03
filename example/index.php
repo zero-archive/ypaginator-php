@@ -19,7 +19,7 @@
                                 ->setCurrentPage($currentPage)
                                 ->setPadding(2)
                                 ->setPrevNext(TRUE)
-                                ->makeLink('/news/{page}/')
+                                ->linkTemplate('{page}', '/news/page/{page}/')
                                 ->getPaginator();
     ?>
 
