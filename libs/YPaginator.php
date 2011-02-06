@@ -13,7 +13,7 @@
  *
  * @package YPaginator
  * @author  dZ <mail@dotzero.ru>
- * @version 0.3 (4-feb-2011)
+ * @version 0.4 (5-feb-2011)
  * @link    http://dotzero.ru
  * @link    https://github.com/dotzero/YPaginator/
  *
@@ -164,17 +164,16 @@ class YPaginator
                 $pages[$key] = $val;
             }
 
-            $result['pages'] = $pages;
-
             if($this->usePrevNextLinks)
             {
-                $result[''] = array();
-
+                $result['pages'] = $pages;
                 $result['prev'] = (($this->currentPage - 1) > 1) ? str_replace($this->maskPattern, ($this->currentPage - 1), $this->linkTemplate) : NULL;
                 $result['next'] = ($this->currentPage < $this->totalPages) ? str_replace($this->maskPattern, ($this->currentPage + 1), $this->linkTemplate) : NULL;
+
+                return $result;
             }
 
-            return $result;
+            return $pages;
         }
 
         return FALSE;
