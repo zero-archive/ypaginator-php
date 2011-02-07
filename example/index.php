@@ -13,14 +13,16 @@
     include '../libs/YPaginator.php';
 
     $currentPage = 30;
+    
+    $options = array('per_page' => 2,
+                     'current' => $currentPage,
+                     'padding' => 2,
+                     'prev_next' => TRUE,
+                     'link_mask'=> '{page}',
+                     'link' => '/news/page/{page}/');
 
-    $paginator = new YPaginator(100);
-    $paginatorArray = $paginator->setRecordsPerPage(2)
-                                ->setCurrentPage($currentPage)
-                                ->setPadding(2)
-                                ->setPrevNext(TRUE)
-                                ->linkTemplate('{page}', '/news/page/{page}/')
-                                ->getPaginator();
+    $paginator = new YPaginator(900, $options);
+    $paginatorArray = $paginator->getPaginator();
     ?>
 
     <div class="searchPager">

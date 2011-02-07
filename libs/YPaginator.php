@@ -13,18 +13,20 @@
  *
  * @package YPaginator
  * @author  dZ <mail@dotzero.ru>
- * @version 0.4 (5-feb-2011)
+ * @version 0.5 (7-feb-2011)
  * @link    http://dotzero.ru
  * @link    https://github.com/dotzero/YPaginator/
  *
  * @example
- * $paginator = new YPaginator(9);
- * $paginatorArray = $paginator->setRecordsPerPage(2)
- *                             ->setCurrentPage(3)
- *                             ->setPadding(2)
- *                             ->setPrevNext(TRUE)
- *                             ->linkTemplate('{page}', '/news/page/{page}/')
- *                             ->getPaginator();
+ * $options = array('per_page' => 2,
+ *                  'current' => 10,
+ *                  'padding' => 2,
+ *                  'prev_next' => TRUE,
+ *                  'link_mask'=> '{page}',
+ *                  'link' => '/news/page/{page}/');
+ *
+ * $paginator = new YPaginator(9, $options);
+ * $paginatorArray = $paginator->getPaginator();
  */
 class YPaginator
 {
@@ -73,74 +75,42 @@ class YPaginator
      *
      * @param integer $totalRecords
      */
-    public function __construct($totalRecords)
+    public function __construct($totalRecords, $options = array())
     {
         $this->totalRecords = intval($totalRecords);
+
+        if(count($options) > 0)
+        {
+            $this->setOptions($options);
+        }
     }
 
-    /**
-     * Установка текущей страницы
-     *
-     * @param integer $page
-     * @return $this
-     */
-    public function setCurrentPage($page)
+    public function setOptions($options = array())
     {
-        $this->currentPage = intval($page);
-
-        return $this;
-    }
-
-    /**
-     * Установка количества записей на страницу
-     *
-     * @param integer $records
-     * @return $this
-     */
-    public function setRecordsPerPage($records)
-    {
-        $this->perPage = (intval($records) > 0) ? intval($records) : 10;
-
-        return $this;
-    }
-
-    /**
-     * Установка количества отображаемый страниц слева и справа от текущей
-     *
-     * @param integer $records
-     * @return $this
-     */
-    public function setPadding($records)
-    {
-        $this->paddingCount = intval($records);
-
-        return $this;
-    }
-
-    /**
-     * Включение в пагинатор ссылок следующая / предыдущая
-     *
-     * @param bool $flag
-     * @return $this
-     */
-    public function setPrevNext($flag = TRUE)
-    {
-        $this->usePrevNextLinks = ($flag === TRUE) ? TRUE : FALSE;
-
-        return $this;
-    }
-
-    /**
-     * Установка шаблона и маски для замены в ссылках
-     *
-     * @param string $mask
-     * @param string $template
-     * @return $this
-     */
-    public function linkTemplate($mask, $template)
-    {
-        $this->maskPattern = $mask;
-        $this->linkTemplate = $template;
+        foreach ($options AS $key => $val)
+        {
+            switch ($key)
+            {
+                case 'per_page' :
+                    $this->perPage = (intval($val) > 0) ? intval($val) : 10;
+                    break;
+                case 'current' :
+                    $this->currentPage = (intval($val) > 0) ? intval($val) : 1;
+                    break;
+                case 'padding' :
+                    $this->paddingCount = intval($val);
+                    break;
+                case 'prev_next' :
+                    $this->usePrevNextLinks = ($val === TRUE) ? TRUE : FALSE;
+                    break;
+                case 'link_mask' :
+                    $this->maskPattern = $val;
+                    break;
+                case 'link' :
+                    $this->linkTemplate = $val;
+                    break;
+            }
+        }
 
         return $this;
     }
