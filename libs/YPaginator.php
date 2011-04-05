@@ -13,7 +13,7 @@
  *
  * @package YPaginator
  * @author  dZ <mail@dotzero.ru>
- * @version 0.5 (7-feb-2011)
+ * @version 0.6 (5-apr-2011)
  * @link    http://dotzero.ru
  * @link    https://github.com/dotzero/YPaginator/
  *
@@ -164,7 +164,7 @@ class YPaginator
         $end = $this->currentPage + $this->paddingCount;
         $end = (intval($end) > $this->totalPages) ? $this->totalPages : intval($end);
 
-        if($start > ($this->paddingCount + 1))
+        if($start >= 2)
         {
             $paginator[] = array('name' => '1', 'link' => 1);
         }
