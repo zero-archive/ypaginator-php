@@ -74,6 +74,7 @@ class YPaginator
      * В конструктор необходимо передать общее количество записей
      *
      * @param integer $totalRecords
+     * @param mixed $options
      */
     public function __construct($totalRecords, $options = array())
     {
