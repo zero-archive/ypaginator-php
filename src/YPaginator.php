@@ -109,6 +109,10 @@ class YPaginator
     {
         $this->recalculate();
 
+        if ($this->totalPages < 2) {
+            return array();
+        }
+
         $paginator = array();
 
         $start = $this->currentPage - $this->neighbours;
