@@ -18,178 +18,147 @@ namespace dotzero;
  */
 class YPaginator
 {
-    /**
-     * Общее количество записей
-     */
-    private $totalRecords = 0;
-
-    /**
-     * Общее количество страниц
-     */
+    private $totalItems = 0;
     private $totalPages = 0;
 
-    /**
-     * Количество записей на страницу
-     */
     private $perPage = 10;
-
-    /**
-     * Номер текущей страницы
-     */
     private $currentPage = 1;
 
-    /**
-     * Количество отображаемых ссылок слева и справа от текущей
-     */
-    private $paddingCount = 2;
+    private $neighbours = 2;
 
-    /**
-     * Добавление в массив ссылок на следующую и предыдущие страницы
-     */
-    private $usePrevNextLinks = true;
+    private $urlMask = '{page}';
+    private $urlTemplate = '?page={page}';
 
-    /**
-     * Шаблон для замены в ссылках
-     */
-    private $maskPattern = '{page}';
-
-    /**
-     * Шаблон ссылок
-     */
-    private $linkTemplate = '?page={page}';
-
-    /**
-     * В конструктор необходимо передать общее количество записей
-     *
-     * @param integer $totalRecords
-     * @param mixed $options
-     */
-    public function __construct($totalRecords, $options = array())
+    public function __construct($totalItems, $perPage, $currentPage = 1)
     {
-        $this->totalRecords = intval($totalRecords);
-
-        if (count($options) > 0) {
-            $this->setOptions($options);
-        }
+        $this->totalItems = intval($totalItems);
+        $this->perPage = intval($perPage);
+        $this->setCurrentPage($currentPage);
     }
 
-    public function setOptions($options = array())
+    public function getCurrentPage()
     {
-        foreach ($options AS $key => $val) {
-            switch ($key) {
-                case 'per_page' :
-                    $this->perPage = (intval($val) > 0) ? intval($val) : 10;
-                    break;
-                case 'current' :
-                    $this->currentPage = (intval($val) > 0) ? intval($val) : 1;
-                    break;
-                case 'padding' :
-                    $this->paddingCount = intval($val);
-                    break;
-                case 'prev_next' :
-                    $this->usePrevNextLinks = ($val === true) ? true : false;
-                    break;
-                case 'link_mask' :
-                    $this->maskPattern = $val;
-                    break;
-                case 'link' :
-                    $this->linkTemplate = $val;
-                    break;
-            }
+        return $this->currentPage;
+    }
+
+    public function setCurrentPage($page)
+    {
+        $this->currentPage = intval($page);
+
+        if ($this->currentPage < 2) {
+            $this->currentPage = 1;
         }
 
         return $this;
     }
 
-    /**
-     * Возвращает ассоциативный массив пагинатора
-     *
-     * @return mixed
-     */
-    public function getPaginator()
+    public function setNeighbours($num)
     {
-        $result = array();
+        $this->neighbours = intval($num);
 
-        $this->recalculatePages();
-
-        if ($this->totalRecords > 0 AND $pages = $this->calcPages()) {
-            foreach ($pages AS $key => $val) {
-                $val['link'] = str_replace($this->maskPattern, $val['link'], $this->linkTemplate);
-                $pages[$key] = $val;
-            }
-
-            if ($this->usePrevNextLinks) {
-                $result['pages'] = $pages;
-                $result['prev'] = (($this->currentPage - 1) > 1) ? str_replace($this->maskPattern,
-                    ($this->currentPage - 1), $this->linkTemplate) : null;
-                $result['next'] = ($this->currentPage < $this->totalPages) ? str_replace($this->maskPattern,
-                    ($this->currentPage + 1), $this->linkTemplate) : null;
-
-                return $result;
-            }
-
-            return $pages;
-        }
-
-        return false;
+        return $this;
     }
 
-    /**
-     * Генерация массива ссылок на страницы
-     *
-     * @return array
-     */
-    private function calcPages()
+    public function setUrlMask($mask)
     {
-        $paginator = array();
+        $this->urlMask = $mask;
 
-        $start = $this->currentPage - $this->paddingCount;
-        $start = (intval($start) < 1) ? 1 : intval($start);
+        return $this;
+    }
 
-        $end = $this->currentPage + $this->paddingCount;
-        $end = (intval($end) > $this->totalPages) ? $this->totalPages : intval($end);
+    public function setUrlTemplate($template)
+    {
+        $this->urlTemplate = $template;
 
-        if ($start >= 2) {
-            $paginator[] = array('name' => '1', 'link' => 1);
-        }
+        return $this;
+    }
 
-        if ($start > 2) {
-            $paginator[] = array('name' => '...', 'link' => $start - 1);
-        }
+    public function getPaginator()
+    {
+        $paginator = array(
+            'prev' => array(),
+            'pages' => $this->build(),
+            'next' => array(),
+        );
 
-        for ($i = $start; $i <= $end; $i++) {
-            $paginator[] = ($this->currentPage == $i) ? array(
-                'name' => $i,
-                'link' => $i,
-                'current' => '1'
-            ) : array('name' => $i, 'link' => $i);
-        }
+        if ($paginator['pages']) {
+            if ($this->currentPage > 1) {
+                $paginator['prev'] = $this->buildPage($this->currentPage - 1);
+            }
 
-        if ($end + 1 < $this->totalPages) {
-            $paginator[] = array('name' => '...', 'link' => $end + 1);
-        }
-
-        if ($end < $this->totalPages) {
-            $paginator[] = array('name' => $this->totalPages, 'link' => $this->totalPages);
+            if ($this->currentPage < $this->totalPages) {
+                $paginator['next'] = $this->buildPage($this->currentPage + 1);
+            }
         }
 
         return $paginator;
     }
 
-    /**
-     * Пересчет количества страниц
-     *
-     * @return bool
-     */
-    private function recalculatePages()
+    protected function recalculate()
     {
-        if (intval($this->totalRecords) > 0) {
-            $this->totalPages = ceil(intval($this->totalRecords) / $this->perPage);
-            $this->currentPage = ($this->currentPage <= $this->totalPages) ? $this->currentPage : 2;
-
-            return true;
+        if ($this->totalItems > 0 AND $this->perPage > 0) {
+            $this->totalPages = ceil($this->totalItems / $this->perPage);
         }
 
-        return false;
+        if ($this->currentPage > $this->totalPages) {
+            $this->currentPage = $this->totalPages;
+        }
+    }
+
+    protected function build()
+    {
+        $this->recalculate();
+
+        $paginator = array();
+
+        $start = $this->currentPage - $this->neighbours;
+        if ($start < 1) {
+            $start = 1;
+        }
+
+        $end = $this->currentPage + $this->neighbours;
+        if ($end > $this->totalPages) {
+            $end = $this->totalPages;
+        }
+
+        // first
+        if ($start > 1) {
+            $paginator[] = $this->buildPage(1);
+        }
+
+        // ellipsis
+        if ($start > 2) {
+            $paginator[] = $this->buildPage($start - 1, '...');
+        }
+
+        // current page with neighbours
+        for ($i = $start; $i <= $end; $i++) {
+            $paginator[] = $this->buildPage($i);
+        }
+
+        // ellipsis
+        if ($end + 1 < $this->totalPages) {
+            $paginator[] = $this->buildPage($end + 1, '...');
+        }
+
+        // last
+        if ($end < $this->totalPages) {
+            $paginator[] = $this->buildPage($this->totalPages);
+        }
+
+        return $paginator;
+    }
+
+    protected function buildPage($num, $name = null)
+    {
+        if ($name === null) {
+            $name = $num;
+        }
+
+        return array(
+            'name' => $name,
+            'url' => str_replace($this->urlMask, $num, $this->urlTemplate),
+            'current' => $this->getCurrentPage() == $num,
+        );
     }
 }
