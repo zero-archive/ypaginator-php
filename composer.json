@@ -2,7 +2,7 @@
     "name": "dotzero/ypaginator",
     "description": "A lightweight PHP paginator, for generating pagination controls in the style of Yandex",
     "license": "MIT",
-    "keywords": ["pager", "pagination"],
+    "keywords": ["pager", "paginator", "pagination"],
     "authors": [
         {
             "name": "dotzero",

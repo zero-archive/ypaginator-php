@@ -1,36 +1,91 @@
-YPaginator
-==========
+# PHP YPaginator
 
-Виджет для создания 'Yandex-like' пагинатора
+[![Build Status](https://travis-ci.org/dotzero/ypaginator-php.svg?branch=master)](https://travis-ci.org/dotzero/ypaginator-php)
+[![Latest Stable Version](https://poser.pugx.org/dotzero/ypaginator/version)](https://packagist.org/packages/dotzero/ypaginator)
+[![License](https://poser.pugx.org/dotzero/ypaginator/license)](https://packagist.org/packages/dotzero/ypaginator)
 
-* отображение ссылок на первую и последнюю страницы
-* замена премежуточных значений на `...`
-* отображение дополнительных ссылок слева и справа от текущей
+A lightweight PHP paginator without a database dependency, for generating pagination controls in the style of Yandex.
 
-Пример пагинатора:
+## Features
 
-    << предыдущая | следующая >>
+- The `first` and `last` page links are shown
+- The `current` and `neighbours` page links are shown
+- Rest of links are replaced by ellipses
+
+## How it looks like:
+
+    << previous | next >>
     |1| ... |5||6||7| ... |100|
 
-### Основные методы класса
+## Usage
 
-Для создания экземпляра класса необходимо передать общее количество записей (не страниц) и параметры пагинатора
+```php
+$total = 100; // Total items
+$perpage = 10; // Items per page
+$current = 5; // Current page
+$neighbours = 2; // Neighbours links beside current page
 
-    new YPaginator($totalRecord, $options);
+$y = new \dotzero\YPaginator($total, $perpage, $current);
 
-Метод `getPaginator` возвращает ассоциативный массив пагинатора
+$paginator = $y
+    ->setNeighbours($neighbours)
+    ->setUrlMask('#num#')
+    ->setUrlTemplate('/foo/page/#num#')
+    ->getPaginator();
 
-    getPaginator()
+print_r($paginator);
+```
 
-### Методы для установки параметров
+Output looks like:
 
-Методом `setOptions($options)` также можно установить параметры пагиантора
+```php
+[
+    "prev" => ["name" => 4,"url" => "/foo/page/4","current" => false], // Previous
+    "pages" => [
+        ["name" => 1,"url" => "/foo/page/1","current" => false], // First
+        ["name" => "...","url" => "/foo/page/2","current" => false],
+        ["name" => 3,"url" => "/foo/page/3","current" => false], // Neighbour
+        ["name" => 4,"url" => "/foo/page/4","current" => false], // Neighbour
+        ["name" => 5,"url" => "/foo/page/5","current" => true],  // Current
+        ["name" => 6,"url" => "/foo/page/6","current" => false], // Neighbour
+        ["name" => 7,"url" => "/foo/page/7","current" => false], // Neighbour
+        ["name" => "...","url" => "/foo/page/8","current" => false],
+        ["name" => 10,"url" => "/foo/page/10","current" => false] // Last
+    ],
+    "next" => ["name" => 6,"url" => "/foo/page/6","current" => false] // Next
+];
+```
 
-### Ключи ассоциативного массива параметров
+## Install
 
-* 'per_page' - количество записей на страницу, для рассчета количества страниц
-* 'current' - текущая страница
-* 'padding' - количество отображаемых ссылок слева и справа от текущей страницы
-* 'prev_next' - добавление в массив пагинатора ссылок на следующую и предыдущие страницы
-* 'link_mask' - установка маски для замены в ссылках
-* 'link' - установка шаблона для замены в ссылках
+### Via composer:
+
+```bash
+$ composer require dotzero/ypaginator
+```
+
+### Without composer
+
+Clone the project using:
+
+```bash
+$ git clone https://github.com/dotzero/ypaginator-php
+```
+
+and include the source files with:
+
+```php
+require_once("ypaginator-php/src/YPaginator.php");
+```
+
+## Test
+
+First install the dependencies, and after you can run:
+
+```bash
+$ vendor/bin/phpunit
+```
+
+## License
+
+Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
