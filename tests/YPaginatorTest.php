@@ -19,7 +19,10 @@ class YPaginatorTest extends PHPUnit_Framework_TestCase
         $y = new YPaginator($total, $perpage, $current);
 
         $paginator = $y->setNeighbours($neighbours)->getPaginator();
-        $actual = array_map(function($page) { return $page['name']; }, $paginator['pages']);
+
+        $actual = array_map(function ($page) {
+            return $page['name'];
+        }, $paginator['pages']);
 
         $this->assertEquals($expected, $actual);
     }

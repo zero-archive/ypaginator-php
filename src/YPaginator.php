@@ -3,9 +3,9 @@
 namespace dotzero;
 
 /**
- * Class Googl
+ * Class YPaginator
  *
- * A lightweight PHP paginator, for generating pagination controls in the style of Yandex.
+ * A lightweight PHP paginator without a database dependency, for generating pagination controls in the style of Yandex.
  *
  * @package dotzero
  * @version 0.7
@@ -18,17 +18,48 @@ namespace dotzero;
  */
 class YPaginator
 {
+    /**
+     * @var int Total items in set.
+     */
     private $totalItems = 0;
+
+    /**
+     * @var int Number of pages.
+     */
     private $totalPages = 0;
 
+    /**
+     * @var int Items per page.
+     */
     private $perPage = 10;
+
+    /**
+     * @var int Current page number.
+     */
     private $currentPage = 1;
 
+    /**
+     * @var int Current page neighbours.
+     */
     private $neighbours = 2;
 
+    /**
+     * @var string URL mask for replacement.
+     */
     private $urlMask = '{page}';
+
+    /**
+     * @var string URL template with mask.
+     */
     private $urlTemplate = '?page={page}';
 
+    /**
+     * YPaginator constructor.
+     *
+     * @param int $totalItems Total items in set
+     * @param int $perPage Items per page
+     * @param int $currentPage Current page number
+     */
     public function __construct($totalItems, $perPage, $currentPage = 1)
     {
         $this->totalItems = intval($totalItems);
@@ -36,11 +67,22 @@ class YPaginator
         $this->setCurrentPage($currentPage);
     }
 
+    /**
+     * Get current page number
+     *
+     * @return int
+     */
     public function getCurrentPage()
     {
         return $this->currentPage;
     }
 
+    /**
+     * Set current page number
+     *
+     * @param $page Current page number
+     * @return $this
+     */
     public function setCurrentPage($page)
     {
         $this->currentPage = intval($page);
@@ -52,6 +94,12 @@ class YPaginator
         return $this;
     }
 
+    /**
+     * Set current page neighbours count
+     *
+     * @param int $num Neighbours count
+     * @return $this
+     */
     public function setNeighbours($num)
     {
         $this->neighbours = intval($num);
@@ -59,6 +107,12 @@ class YPaginator
         return $this;
     }
 
+    /**
+     * Set URL mask for replacement
+     *
+     * @param string $mask URL mask
+     * @return $this
+     */
     public function setUrlMask($mask)
     {
         $this->urlMask = $mask;
@@ -66,6 +120,12 @@ class YPaginator
         return $this;
     }
 
+    /**
+     * Set URL template with mask
+     *
+     * @param string $template URL template
+     * @return $this
+     */
     public function setUrlTemplate($template)
     {
         $this->urlTemplate = $template;
@@ -73,6 +133,11 @@ class YPaginator
         return $this;
     }
 
+    /**
+     * Get Paginator array based of params
+     *
+     * @return array
+     */
     public function getPaginator()
     {
         $paginator = array(
@@ -94,6 +159,9 @@ class YPaginator
         return $paginator;
     }
 
+    /**
+     * Recalculate number of pages
+     */
     protected function recalculate()
     {
         if ($this->totalItems > 0 AND $this->perPage > 0) {
@@ -105,6 +173,11 @@ class YPaginator
         }
     }
 
+    /**
+     * Calculate pages logic
+     *
+     * @return array
+     */
     protected function build()
     {
         $this->recalculate();
@@ -153,6 +226,13 @@ class YPaginator
         return $paginator;
     }
 
+    /**
+     * Paginator page builder
+     *
+     * @param int $num Number of page
+     * @param mixed $name Name of label
+     * @return array
+     */
     protected function buildPage($num, $name = null)
     {
         if ($name === null) {

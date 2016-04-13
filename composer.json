@@ -1,6 +1,6 @@
 {
     "name": "dotzero/ypaginator",
-    "description": "A lightweight PHP paginator, for generating pagination controls in the style of Yandex",
+    "description": "A lightweight PHP paginator without a database dependency, for generating pagination controls in the style of Yandex",
     "license": "MIT",
     "keywords": ["pager", "paginator", "pagination"],
     "authors": [

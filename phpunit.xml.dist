@@ -10,7 +10,7 @@
          stopOnFailure="false"
          syntaxCheck="false">
     <testsuites>
-        <testsuite name="Googl Test Suite">
+        <testsuite name="YPaginator Test Suite">
             <directory suffix=".php">./tests/</directory>
         </testsuite>
     </testsuites>
